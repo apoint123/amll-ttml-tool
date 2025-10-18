@@ -11,6 +11,7 @@
 
 import { AudioSlider } from "$/components/AudioControls/audio-slider.tsx";
 import {
+	audioBufferAtom,
 	audioElAtom,
 	audioPlayingAtom,
 	currentDurationAtom,
@@ -19,9 +20,9 @@ import {
 	volumeAtom,
 } from "$/states/audio.ts";
 import {
-	keyPlayPauseAtom,
 	keyPlaybackRateDownAtom,
 	keyPlaybackRateUpAtom,
+	keyPlayPauseAtom,
 	keySeekBackwardAtom,
 	keySeekForwardAtom,
 	keyVolumeDownAtom,
@@ -46,7 +47,7 @@ import {
 	Text,
 	Tooltip,
 } from "@radix-ui/themes";
-import { useAtom, useAtomValue, useStore } from "jotai";
+import { useAtom, useAtomValue, useSetAtom, useStore } from "jotai";
 import { type FC, memo, useCallback, useEffect, useState } from "react";
 
 const AudioPlaybackKeyBinding = memo(() => {
@@ -93,6 +94,7 @@ export const AudioControls: FC = memo(() => {
 	const [audioPlaying, setAudioPlaying] = useAtom(audioPlayingAtom);
 	const [volume, setVolume] = useAtom(volumeAtom);
 	const [playbackRate, setPlaybackRate] = useAtom(playbackRateAtom);
+	const setAudioBuffer = useSetAtom(audioBufferAtom);
 
 	const onLoadMusic = useCallback(() => {
 		const inputEl = document.createElement("input");
@@ -138,6 +140,9 @@ export const AudioControls: FC = memo(() => {
 		const onVolumeChange = () => {
 			setVolume(audioEngine.volume);
 		};
+		const onMusicDecoded = (evt: Event) => {
+			setAudioBuffer((evt as CustomEvent<AudioBuffer>).detail);
+		};
 		setAudioLoaded(audioEngine.musicLoaded);
 		setAudioPlaying(audioEngine.musicPlaying);
 		setVolume(audioEngine.volume);
@@ -147,14 +152,17 @@ export const AudioControls: FC = memo(() => {
 		audioEngine.addEventListener("music-pause", onMusicPause);
 		audioEngine.addEventListener("music-resume", onMusicResume);
 		audioEngine.addEventListener("volume-change", onVolumeChange);
+		audioEngine.addEventListener("music-decoded", onMusicDecoded);
+
 		return () => {
 			audioEngine.removeEventListener("music-load", onMusicLoad);
 			audioEngine.removeEventListener("music-unload", onMusicUnload);
 			audioEngine.removeEventListener("music-pause", onMusicPause);
 			audioEngine.removeEventListener("music-resume", onMusicResume);
 			audioEngine.removeEventListener("volume-change", onVolumeChange);
+			audioEngine.removeEventListener("music-decoded", onMusicDecoded);
 		};
-	}, [setAudioPlaying, setVolume, setPlaybackRate]);
+	}, [setAudioPlaying, setVolume, setPlaybackRate, setAudioBuffer]);
 
 	useEffect(() => {
 		audioEngine.volume = volume;

@@ -10,15 +10,15 @@
  */
 
 import {
-	ToolMode,
 	lyricLinesAtom,
 	selectedLinesAtom,
+	ToolMode,
 	toolModeAtom,
 } from "$/states/main.ts";
 import { Box, Flex, Text } from "@radix-ui/themes";
 import { atom, useAtomValue } from "jotai";
-import { focusAtom } from "jotai-optics";
 import { splitAtom } from "jotai/utils";
+import { focusAtom } from "jotai-optics";
 import {
 	type FC,
 	forwardRef,

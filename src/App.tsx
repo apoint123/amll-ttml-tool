@@ -29,14 +29,16 @@ import {
 	TextArea,
 	Theme,
 } from "@radix-ui/themes";
+import Spectrogram from "./components/Spectrogram";
 import "@radix-ui/themes/styles.css";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { platform, version } from "@tauri-apps/plugin-os";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAtomValue, useStore } from "jotai";
-import { Suspense, lazy, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
+import { useTranslation } from "react-i18next";
 import { ToastContainer, toast } from "react-toastify";
 import saveFile from "save-file";
 import semverGt from "semver/functions/gt";
@@ -48,22 +50,21 @@ import { SyncKeyBinding } from "./components/LyricLinesView/sync-keybinding.tsx"
 import RibbonBar from "./components/RibbonBar";
 import { TitleBar } from "./components/TitleBar";
 import {
-	ToolMode,
-	isDarkThemeAtom,
-	lyricLinesAtom,
-	toolModeAtom,
-} from "./states/main.ts";
-import { showTouchSyncPanelAtom } from "./states/sync.ts";
-import { parseLyric as parseTTML } from "./utils/ttml-parser.ts";
-import type { TTMLLyric } from "./utils/ttml-types.ts";
-import exportTTMLText from "./utils/ttml-writer.ts";
-import { useTranslation } from "react-i18next";
-import {
 	autosaveEnabledAtom,
 	autosaveIntervalAtom,
 	autosaveLimitAtom,
 } from "./states/config.ts";
+import {
+	isDarkThemeAtom,
+	lyricLinesAtom,
+	ToolMode,
+	toolModeAtom,
+} from "./states/main.ts";
+import { showTouchSyncPanelAtom } from "./states/sync.ts";
 import { addSnapshot } from "./utils/autosave.ts";
+import { parseLyric as parseTTML } from "./utils/ttml-parser.ts";
+import type { TTMLLyric } from "./utils/ttml-types.ts";
+import exportTTMLText from "./utils/ttml-writer.ts";
 
 const LyricLinesView = lazy(() => import("./components/LyricLinesView"));
 const AMLLWrapper = lazy(() => import("./components/AMLLWrapper"));
@@ -293,7 +294,12 @@ function App() {
 				<Flex direction="column" height="100vh">
 					<TitleBar />
 					<RibbonBar />
-					<Box flexGrow="1" overflow="hidden">
+					{toolMode === ToolMode.Sync && (
+						<Box height="256px" flexShrink={"0"} p="2">
+							<Spectrogram />
+						</Box>
+					)}
+					<Box flexGrow="1" overflow="hidden" style={{ minHeight: 0 }}>
 						<AnimatePresence mode="wait">
 							{toolMode !== ToolMode.Preview && (
 								<SuspensePlaceHolder key="edit">

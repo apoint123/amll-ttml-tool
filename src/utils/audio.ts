@@ -87,6 +87,9 @@ class AudioEngine extends EventTarget {
 		}
 		this.dispatchEvent(new Event("music-loading"));
 		this.musicBuffer = await this.ctx.decodeAudioData(audioData);
+		this.dispatchEvent(
+			new CustomEvent("music-decoded", { detail: this.musicBuffer }),
+		);
 		await this.generateMusicWaveform();
 		this.dispatchEvent(new Event("music-load"));
 	}
